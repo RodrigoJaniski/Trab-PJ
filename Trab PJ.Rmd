@@ -1,0 +1,65 @@
+---
+title: "Trabalho PJ"
+author: "Jonathas Pereira <br>
+         Leonardo Bhering <br>
+         Rodrigo Janiski Gavazzoni"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true               # ativa o sumário
+    toc_float: true         # deixa o sumário flutuante
+    number_sections: true   # numera as seções
+    toc_depth: 3            # permite subtítulos no sumário
+    theme: journal          # tema limpo e elegante
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+library(parallel)
+library(ggplot2)
+library(DescTools)
+library(gridExtra)
+library(scales)
+```
+
+# Objetivo principal
+```{r, echo= FALSE}
+p1_1 <- ggplot(data.frame(x=c(0,1)), aes(x=x)) + 
+    stat_function(fun=dnorm, colour="black", size=1.5) +
+    xlim(-4,4) + 
+    ggtitle("Normal Padrão")
+
+p1_2 <- ggplot(data.frame(x = c(-4, 4)), aes(x = x)) + 
+  stat_function(fun = dt, args = list(df = 50), color = "black", size = 1.5) +
+  ggtitle("t (50 graus de liberdade)")
+
+p1_3 <- ggplot(data.frame(x = c(-4, 4)), aes(x = x)) + 
+  stat_function(fun = dt, args = list(df = 40), color = "black", size = 1.5) +
+  ggtitle("t (40 graus de liberdade)")
+
+p1_4 <- ggplot(data.frame(x = c(-4, 4)), aes(x = x)) + 
+  stat_function(fun = dt, args = list(df = 30), color = "black", size = 1.5) +
+  ggtitle("t (30 graus de liberdade)")
+
+p1_5 <- ggplot(data.frame(x = c(-4, 4)), aes(x = x)) + 
+  stat_function(fun = dt, args = list(df = 20), color = "black", size = 1.5) +
+  ggtitle("t (20 graus de liberdade)")
+
+p1_6 <- ggplot(data.frame(x = c(-4, 4)), aes(x = x)) + 
+  stat_function(fun = dt, args = list(df = 10), color = "black", size = 1.5) +
+  ggtitle("t (10 graus de liberdade)")
+
+grid.arrange(p1_1, p1_2, p1_3, p1_4, p1_5, p1_6, ncol=3)
+```
+
+# Distribuições analisadas
+```{r}
+set.seed(123)
+n <- 100
+x <- runif(n, 0, 10)
+erro <- rnorm(n, mean = 0, sd = 2)
+y <- 3 + 1.5 * x + erro
+dados <- data.frame(x, y)
+head(dados)
+```
+
