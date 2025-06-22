@@ -1,9 +1,8 @@
 ---
-title: "Trabalho PJ"
-author: "Jonathas Pereira <br>
-         Leonardo Bhering <br>
+title: "Avaliação de Testes de Normalidade - Erros Tipo I e II"
+author: "Jonathas Pereira,
+         Leonardo Bhering,
          Rodrigo Janiski Gavazzoni"
-date: "`r Sys.Date()`"
 output:
   html_document:
     toc: true               # ativa o sumário
@@ -11,7 +10,13 @@ output:
     number_sections: true   # numera as seções
     toc_depth: 3            # permite subtítulos no sumário
     theme: journal          # tema limpo e elegante
+    css: estilos.css
 ---
+```{css, echo=FALSE}
+p {
+  text-align: justify;
+}
+```
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
@@ -23,7 +28,118 @@ library(scales)
 ```
 
 # Objetivo principal
-```{r, echo= FALSE}
+## Proposta
+Diversos procedimentos de estatística se baseiam no pressuposto de normalidade. Por vezes este pressuposto é verificado por testes de normalidade dos dados ou resíduos de modelos ajustados. É de interesse conhecer características de sensibilidade a desvios de normalidade, robustez, dentre outras. Vamos considerar aqui o cenário mais simples, de testar normalidade de dados gerados por diferentes distribuições e avaliar os erros tipo I e II de testes de normalidade. Considere ao menos dois testes de normalidade, diferentes distribuições geradoras dos dados e tamanhos de amostra.
+
+## Direcionamento do relatório
+Para este teste selecionamos dois testes de normalidade, sendo eles Kolmogorov-Smirnov (KS) e Jarque-Bera (JB) em diferentes cenários, avaliando o erro tipo I (probabilidade de rejeitar incorretamente a normalidade quando os dados são normais) e o erro tipo II (Probabilidade de aceitar incorretamente a normalidade quando os dados não são normais) em seis distribuições teóricas, sendo elas a distribuição normal e 5 graus de liberdade diferentes da distribuição t-Student.
+
+## Teste de Kolmogorov-Smirnov
+O teste de kolmogorov-Smirnov, também conhecido como teste Ks é um teste não paramétrico de comparação entre uma amostra e uma probabilidade de referência ou entre duas distribuições, sendo nosso caso. O teste KS quantifica a distância entre a função distribuição empírica e a a função distribuição acumulada da distribuição de referência. Sua formula é:
+
+$$
+D = \sup_x |F_n(x) - F(x)|
+$$
+Sobre suas limitações, o teste de KS é conhecido por não desempenhar bem nas caudas das distribuições, sendo mais sensível ao centro da distribuição e em desvios sutis como assimetrias e curtoses. Além disso, como a maioria dos testes, apresenta menor poder estatístico qunado tratamos de amostras pequenas.
+
+## Teste Jarque–Bera
+O segundo teste escolhido foi o Teste Jarque-Bera, teste utilizado principalmente para verificação de curtose e assimetria de amostras comparadas à distribuição normal. sua formula é:
+$$
+JB = \frac{n}{6} \cdot S^2 + \frac{n}{24} \cdot (K - 3)^2
+$$
+Sendo "n" o número de observações, "S" a assimetria da amostra e "K" a curtose. suas formulas são:
+$$
+S = \frac{\frac{1}{n} \sum_{i=1}^n (x_i - \bar{x})^3}{\left( \frac{1}{n} \sum_{i=1}^n (x_i - \bar{x})^2 \right)^{3/2}}
+$$
+
+$$
+K = \frac{\frac{1}{n} \sum_{i=1}^n (x_i - \bar{x})^4}{\left( \frac{1}{n} \sum_{i=1}^n (x_i - \bar{x})^2 \right)^2}
+$$
+
+## Código dos testes
+```{r, echo=TRUE}
+# 1) Testes não paramétricos
+testeNaoParametricos <- function(N){
+    
+    # MODIFICAR AS DISTRIBUIÇÕES PARA NORMAL E T
+    # Amostra Normal
+    amostraNormal <- rnorm(N)
+  
+    # Amostra T, 100 graus de liberdade
+    amostraT100 <- rt(N, 100)
+
+    # Amostra T, 80 graus de liberdade
+    amostraT80 <- rt(N, 80)
+
+    # Amostra T, 60 graus de liberdade
+    amostraT60 <- rt(N, 60)
+
+    # Amostra T, 40 graus de liberdade
+    amostraT40 <- rt(N, 40)
+
+    # Amostra T, 20 graus de liberdade
+    amostraT20 <- rt(N, 20)
+  
+    # Kolmogorov-smirnov Test
+    kolmogorovNormal <- ks.test(amostraNormal,
+                              "pnorm",
+                              mean=mean(amostraNormal),
+                              sd=sd(amostraNormal))
+
+    kolmogorovT100 <- ks.test(amostraT100,
+                              "pnorm",
+                              mean=mean(amostraT100),
+                              sd=sd(amostraT100))
+    kolmogorovT80 <- ks.test(amostraT80,
+                              "pnorm",
+                              mean=mean(amostraT80),
+                              sd=sd(amostraT80))
+    kolmogorovT60 <- ks.test(amostraT60,
+                              "pnorm",
+                              mean=mean(amostraT60),
+                              sd=sd(amostraT60))
+    kolmogorovT40 <- ks.test(amostraT40,
+                              "pnorm",
+                              mean=mean(amostraT40),
+                              sd=sd(amostraT40))
+    kolmogorovT20 <- ks.test(amostraT20,
+                              "pnorm",
+                              mean=mean(amostraT20),
+                              sd=sd(amostraT20))
+
+    kolmogorovResultado <- c(kolmogorovTipoI            = kolmogorovNormal$p.value < 0.05,
+                             kolmogorovTipoIIT100       = !(kolmogorovT100$p.value < 0.05),
+                             kolmogorovTipoIIT80        = !(kolmogorovT80$p.value < 0.05),
+                             kolmogorovTipoIIT60        = !(kolmogorovT60$p.value < 0.05),
+                             kolmogorovTipoIIT40        = !(kolmogorovT40$p.value < 0.05),
+                             kolmogorovTipoIIT20        = !(kolmogorovT20$p.value < 0.05))
+
+    # Robust Jarque-Bera Test
+    jarqueNormal <- JarqueBeraTest(amostraNormal)
+    jarqueT100 <- JarqueBeraTest(amostraT100)
+    jarqueT80 <- JarqueBeraTest(amostraT80)
+    jarqueT60 <- JarqueBeraTest(amostraT60)
+    jarqueT40 <- JarqueBeraTest(amostraT40)
+    jarqueT20 <- JarqueBeraTest(amostraT20)
+  
+    jarqueResultado <- c(jarqueTipoI            = jarqueNormal$p.value < 0.05,
+                         jarqueTipoIIT100       = !(jarqueT100$p.value < 0.05),
+                         jarqueTipoIIT80        = !(jarqueT80$p.value < 0.05),
+                         jarqueTipoIIT60        = !(jarqueT60$p.value < 0.05),
+                         jarqueTipoIIT40        = !(jarqueT40$p.value < 0.05),
+                         jarqueTipoIIT20        = !(jarqueT20$p.value < 0.05))
+
+    # Resultados
+    resultado <- c(kolmogorovResultado, jarqueResultado)
+    return(resultado)
+}
+```
+
+
+# Metodologia
+## Distribuições analisadas
+A probabilidade de referência escolhida foi a distribuição Normal e as distribuições testadas sendo distribuições t-Student com diferentes valores de grau de liberdade, sendo eles 10, 20, 30, 40 e 50, como podemos ver nos gráficos:
+```{r, echo=TRUE}
 p1_1 <- ggplot(data.frame(x=c(0,1)), aes(x=x)) + 
     stat_function(fun=dnorm, colour="black", size=1.5) +
     xlim(-4,4) + 
@@ -52,14 +168,65 @@ p1_6 <- ggplot(data.frame(x = c(-4, 4)), aes(x = x)) +
 grid.arrange(p1_1, p1_2, p1_3, p1_4, p1_5, p1_6, ncol=3)
 ```
 
-# Distribuições analisadas
+## Tamanhos amostrais e replicação paralela
+No total, utilizamos 46 tamanhos amostrais, sendo eles selecionados desta maneira:
+```{r, echo=TRUE}
+N <- c(100,1000, 10000)
+#N <- c(seq(10, 100, by = 10), seq(150,500, by = 50), seq(600,1000, by = 100), seq(2000, 10000, by = 1000))
+```
+
+Para criarmos volume de teste, cada tamanho de amostra foi retestada 100 mil vezes, coletando apenas se os testes supriam ou não a hipotese nula. Sobre a hipotese nula, utilizamos um nivel de significância de 5%.
+```{r, echo=TRUE}
+# 2) Replicação Paralela
+replicacaoParalela <- function(N, cl) {
+
+    t1 <- Sys.time()
+
+    # Equivalente ao replicate, para paralelismo
+    simulacao <- parSapply(cl, 1:1E5, function(i) testeNaoParametricos(N))
+
+    # Calculo da proporção de TRUEs, que representam os erros.
+    resultado <- rowMeans(simulacao)
+
+    print(paste0("N = ", N))
+    t2 <- Sys.time()
+    dif <- t1-t2
+    print(dif)
+
+    return(c(N = N, resultado))
+}
+
+```
+
+Para agilizarmos o teste, utilizamos um processamento paralelizado, com 12 clusters ao total:
+```{r, echo=TRUE}
+# Criação do cluster e exportação das funções
+nCluSter <- 12 # IMPORTANTE: Substituir pelo número de cores que deseja alocar
+cl <- makeCluster(nCluSter)
+clusterExport(cl, c("testeNaoParametricos", "N"), envir = environment())
+clusterEvalQ(cl, library(DescTools))
+
+
+# Execução da Replicação e calculo do tempo total
+t1 <-  Sys.time() 
+resultado <- sapply(N, function(x) replicacaoParalela(x, cl))
+t2 <- Sys.time()
+t2 - t1
+
+# Encerramento do cluster
+stopCluster(cl)
+
+resultado <- t(resultado)
+```
+
+# Visualizações
 ```{r}
-set.seed(123)
-n <- 100
-x <- runif(n, 0, 10)
-erro <- rnorm(n, mean = 0, sd = 2)
-y <- 3 + 1.5 * x + erro
-dados <- data.frame(x, y)
-head(dados)
+ggplot(resultado, aes(x = N, y = kolmogorovTipoI)) +
+  geom_line(color = "blue") +
+  geom_line(aes(y = jarqueTipoI), color = "red") +
+  geom_hline(yintercept = 0.05, linetype = "dashed") +
+  labs(title = "Erro Tipo I para Dados Normais",
+       x = "Tamanho Amostral", y = "Taxa de Erro Tipo I") +
+  scale_y_continuous(labels = percent, limits = c(0, 0.1))
 ```
 
